@@ -1,0 +1,25 @@
+name: Run MBTA Alerts Bot
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"   # runs every 3 hours
+  workflow_dispatch:        # lets you run manually from Actions tab
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install discord.py requests
+
+      - name: Run the bot
+        run: python mbta_alerts_bot.py
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
