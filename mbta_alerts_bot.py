@@ -1,12 +1,15 @@
+import os
 import discord
 import requests
 import asyncio
 
-# Your bot token from the Discord Developer Portal
-DISCORD_BOT_TOKEN = "MTMzNTMwNjc4NTI0MTY5ODMyNQ.GyVEk4.Ig2UYmwZ2BnwjNqE10wSvCOMgf0Bhk2_Ii-aUA"  # Replace with your bot's token
+# Load the bot token from environment variables (GitHub Secret: BOT_TOKEN)
+DISCORD_BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not DISCORD_BOT_TOKEN:
+    raise ValueError("❌ No BOT_TOKEN found! Did you set it as a GitHub secret?")
 
-# Your MBTA API key (replace with your actual API key)
-MBTA_API_KEY = "9855ec1725434b0596a273fd9f7cd2b8"  # Replace with your MBTA API key
+# Your MBTA API key (still hardcoded for now — you can move this to a secret too if you want)
+MBTA_API_KEY = "9855ec1725434b0596a273fd9f7cd2b8"
 
 # The Discord channel ID where you want to send alerts
 DISCORD_CHANNEL_ID = 1334407890223628349  # Replace with your actual channel ID
@@ -21,7 +24,7 @@ async def fetch_mbta_alerts():
 
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Ensure request is successful
+        response.raise_for_status()
         data = response.json()
 
         if "data" in data and data["data"]:
@@ -37,16 +40,16 @@ async def fetch_mbta_alerts():
 
             full_message = "\n\n".join(alert_messages)
 
-            # Split messages if they exceed 2000 characters
+            # Split into multiple messages if over 2000 chars
             messages = []
             while len(full_message) > 2000:
-                split_index = full_message[:2000].rfind("\n\n")  # Find a logical split point
+                split_index = full_message[:2000].rfind("\n\n")
                 if split_index == -1:
-                    split_index = 2000  # Fallback split if no suitable boundary found
+                    split_index = 2000
                 messages.append(full_message[:split_index])
                 full_message = full_message[split_index:].lstrip()
 
-            messages.append(full_message)  # Add remaining content
+            messages.append(full_message)
 
             channel = client.get_channel(DISCORD_CHANNEL_ID)
             if channel:
@@ -63,7 +66,7 @@ async def background_task():
     await client.wait_until_ready()
     while not client.is_closed():
         await fetch_mbta_alerts()
-        await asyncio.sleep(10800)  # Fetch new alerts every 3 hours
+        await asyncio.sleep(10800)  # Run every 3 hours (10800s)
 
 @client.event
 async def on_ready():
