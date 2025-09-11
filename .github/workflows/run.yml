@@ -2,7 +2,7 @@ name: Run MBTA Alerts Bot
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # runs every 3 hours
+    - cron: "0 */12 * * *"   # runs every 3 hours
   workflow_dispatch:        # lets you run manually from Actions tab
 
 jobs:
